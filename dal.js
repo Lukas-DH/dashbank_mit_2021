@@ -31,4 +31,43 @@ function all(params) {
   });
 }
 
-module.exports = { create, all };
+// find user account
+function find(email) {
+  return new Promise((resolve, reject) => {
+    const customers = db
+      .collection("users")
+      .find({ email: email })
+      .toArray(function (err, docs) {
+        err ? reject(err) : resolve(docs);
+      });
+  });
+}
+
+// find user account
+function findOne(email) {
+  return new Promise((resolve, reject) => {
+    const customers = db
+      .collection("users")
+      .findOne({ email: email })
+      .then((doc) => resolve(doc))
+      .catch((err) => reject(err));
+  });
+}
+
+// update - deposit/withdraw amount
+function update(email, amount) {
+  return new Promise((resolve, reject) => {
+    const customers = db
+      .collection("users")
+      .findOneAndUpdate(
+        { email: email },
+        { $inc: { balance: amount } },
+        { returnOriginal: false },
+        function (err, documents) {
+          err ? reject(err) : resolve(documents);
+        }
+      );
+  });
+}
+
+module.exports = { create, findOne, find, update, all };
