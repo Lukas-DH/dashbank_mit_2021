@@ -24,24 +24,27 @@ function Withdraw() {
   console.log(cUser.user[0].currentUser);
 
   return (
-    <Card
-      bgcolor="secondary"
-      header="Withdraw"
-      status={status}
-      body={
-        show ? (
-          <WithdrawForm
-            setShow={setShow}
-            setStatus={setStatus}
+    <div className="d-flex justify-content-center">
+      <Card
+        txtcolor="dark"
+        bgcolor="light"
+        header="Withdraw"
+        status={status}
+        body={
+          show ? (
+            <WithdrawForm
+              setShow={setShow}
+              setStatus={setStatus}
 
-            // currentUser={currentUser}
-            // setCurrentUser={setCurrentUser}
-          />
-        ) : (
-          <WithdrawMsg setShow={setShow} setStatus={setStatus} />
-        )
-      }
-    />
+              // currentUser={currentUser}
+              // setCurrentUser={setCurrentUser}
+            />
+          ) : (
+            <WithdrawMsg setShow={setShow} setStatus={setStatus} />
+          )
+        }
+      />
+    </div>
   );
 }
 
@@ -49,7 +52,7 @@ function WithdrawMsg(props) {
   return (
     <>
       <h5>You are not logged in!</h5>
-      <a type="submit" className="btn btn-light" href="/#/login">
+      <a type="submit" className="btn btn-outline-dark" href="/#/login">
         Go to Log in page
       </a>
     </>
@@ -73,11 +76,7 @@ function WithdrawForm(props) {
       .then((text) => {
         try {
           const data = JSON.parse(text);
-          props.setStatus(
-            `Hurray!, you balance has been updated to ${JSON.stringify(
-              data.value.balance
-            )}`
-          );
+          props.setStatus(`Hurray!, you withdrew ${amount}`);
 
           // props.setShow(false);
           // props.setCurrentUser(data.value);
@@ -108,7 +107,7 @@ function WithdrawForm(props) {
         onChange={(e) => setAmount(e.currentTarget.value)}
       />
       <br />
-      <button type="submit" className="btn btn-light" onClick={handle}>
+      <button type="submit" className="btn btn-outline-dark" onClick={handle}>
         Withdraw
       </button>
     </>

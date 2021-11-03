@@ -1,99 +1,117 @@
 function Deposit() {
-  const [show, setShow] = React.useState(true);
+  // const atmObject = React.useContext(UserContext);
+  const cUser = React.useContext(CurrentUserContext);
+
+  // cUser.user[0].currentUser;
+  const [show, setShow] = React.useState(!cUser.user[0].currentUser);
   const [status, setStatus] = React.useState("");
 
-  return (
-    // <Card
-    //   bgcolor="warning"
-    //   header="Deposit"
-    //   status={status}
-    //   body={
-    //     show ? (
-    //       <DepositForm setShow={setShow} setStatus={setStatus} />
-    //     ) : (
-    //       <DepositMsg setShow={setShow} />
-    //     )
-    //   }
-    // />
-    <>
-      <h1 id="loggedInStatus">You are not yet logged in</h1>
-      <hr />
-      <input id="email" type="email" placeholder="Email" />
-      <br />
-      <input id="password" type="password" placeholder="Password" />
-      <br />
+  if (firebase.apps.length === 0) {
+    var firebaseConfig = {
+      apiKey: "AIzaSyDnJpIQQYWat2S76q64Dh0YhsCzlQ9Es0k",
+      authDomain: "courso-cbffb.firebaseapp.com",
+      databaseURL:
+        "https://courso-cbffb-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "courso-cbffb",
+      storageBucket: "courso-cbffb.appspot.com",
+      messagingSenderId: "895232061386",
+      appId: "1:895232061386:web:b1bd1ad8239b8e509c2933",
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  }
 
-      <br />
-      <button id="login">Login</button>
-      <button id="signup">SignUp</button>
-      <button id="googlelogin">google login</button>
-      <button id="logout" style={{ display: "none" }}>
-        Logout
-      </button>
-    </>
+  console.log(cUser.user[0].currentUser);
+
+  return (
+    <div className="d-flex justify-content-center">
+      <Card
+        bgcolor="light"
+        txtcolor="dark"
+        header="Deposit"
+        status={status}
+        body={
+          show ? (
+            <DepositForm
+              setShow={setShow}
+              setStatus={setStatus}
+
+              // currentUser={currentUser}
+              // setCurrentUser={setCurrentUser}
+            />
+          ) : (
+            <DepositMsg setShow={setShow} setStatus={setStatus} />
+          )
+        }
+      />
+    </div>
   );
 }
 
 function DepositMsg(props) {
   return (
     <>
-      <h5>Success</h5>
-      <button
-        type="submit"
-        className="btn btn-light"
-        onClick={() => props.setShow(true)}
-      >
-        Deposit again
-      </button>
+      <h5>You are not logged in!</h5>
+      <a type="submit" className="btn btn-outline-dark" href="/#/login">
+        Go to Log in page
+      </a>
     </>
   );
 }
 
 function DepositForm(props) {
-  const [email, setEmail] = React.useState("");
   const [amount, setAmount] = React.useState("");
-  const ctx = React.useContext(UserContext);
+  const auth = firebase.auth();
+  const [data, setData] = React.useState("");
+
+  fetch(`/account/find/${auth.currentUser.email}`)
+    .then((response) => response.json())
+    .then((data) => {
+      setData(data[0].balance);
+    });
 
   function handle() {
-    const user = ctx.users.find((user) => user.email == email);
-    if (!user) {
-      props.setStatus("fail!");
-      return;
-    }
+    fetch(`/account/update/${auth.currentUser.email}/${amount}`)
+      .then((response) => response.text())
+      .then((text) => {
+        try {
+          const data = JSON.parse(text);
+          props.setStatus(
+            `Hurray!, you deposited ${Number(
+              amount
+            )}. Check out your new balance above`
+          );
 
-    user.balance = user.balance + Number(amount);
-    console.log(user);
-    props.setStatus(
-      "you deposited " +
-        amount +
-        " euro and you balance is " +
-        user.balance +
-        "."
-    );
-    props.setShow(false);
+          // props.setShow(false);
+          // props.setCurrentUser(data.value);
+          console.log("JSON:", data);
+          console.log("HEY ZYOU HIT ME:", data);
+        } catch (err) {
+          props.setStatus("Deposit failed");
+          console.log("err:", text);
+        }
+      });
   }
 
   return (
     <>
-      Email
-      <br />
+      <p>Balance : {data}</p>
       <input
-        type="input"
+        type="hidden"
         className="form-control"
-        placeholder="Enter email"
-        value={email}
-        onChange={(e) => setEmail(e.currentTarget.value)}
+        // value={props.currentUser.email}
       />
+      Amount
       <br />
       <input
-        type="input"
+        type="number"
         className="form-control"
-        placeholder="Enter Amount"
+        placeholder="Enter amount"
         value={amount}
         onChange={(e) => setAmount(e.currentTarget.value)}
       />
       <br />
-      <button type="submit" className="btn btn-light" onClick={handle}>
+      <button type="submit" className="btn btn-outline-dark" onClick={handle}>
         Deposit
       </button>
     </>
